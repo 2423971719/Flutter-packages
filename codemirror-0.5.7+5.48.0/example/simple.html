@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+
+<!-- Copyright (c) 2014, Google Inc. Please see the AUTHORS file for details.
+     All rights reserved. Use of this source code is governed by a BSD-style
+     license that can be found in the LICENSE file. -->
+
+<html>
+  <head>
+  	<meta charset="utf-8">
+  	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dart CodeMirror Demo</title>
+    <link href="simple.css" rel="stylesheet">
+    <link href="packages/codemirror/codemirror.css" rel="stylesheet">
+    <link href="packages/codemirror/addon/hint/show-hint.css" rel="stylesheet">
+  </head>
+
+  <body>
+    <script src="packages/codemirror/codemirror.js"></script>
+
+    <h2>Dart CodeMirror Demo</h2>
+    <p id="version">&nbsp;</p>
+
+    <div id="controls">
+      <select id="theme"></select>
+      <select id="mode"></select>
+      <input type="checkbox" id="lineNumbers">Line numbers
+      <input type="checkbox" id="tabIndent">Indent with tabs
+    </div>
+
+    <textarea id="textContainer">
+import 'dart:math' show Random;
+
+void main() {
+  print(new Die(n: 12).roll());
+}
+
+// Define a class.
+class Die {
+  // Define a class variable.
+  static Random shaker = new Random();
+
+  // Define instance variables.
+  int sides, value;
+
+  // Define a method using shorthand syntax.
+  String toString() => '$value';
+
+  // Define a constructor.
+  Die({int n: 6}) {
+    if (4 <= n && n <= 20) {
+      sides = n;
+    } else {
+      // Support for errors and exceptions.
+      throw new ArgumentError(/* */);
+    }
+  }
+
+  // Define an instance method.
+  int roll() {
+    return value = shaker.nextInt(sides) + 1;
+  }
+}
+</textarea>
+
+    <p id="footer"></p>
+
+    <script src="simple.dart.js"></script>
+  </body>
+</html>

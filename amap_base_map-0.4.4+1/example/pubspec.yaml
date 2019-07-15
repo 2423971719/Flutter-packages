@@ -1,0 +1,25 @@
+name: amap_base_example
+description: Demonstrates how to use the amap_base plugin.
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^0.1.2
+  amap_base_map:
+    path: ../
+  decorated_flutter: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+    - images/
+    - amap_assets/

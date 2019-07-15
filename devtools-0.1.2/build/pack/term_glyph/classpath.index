@@ -1,0 +1,17 @@
+8
+
+term_glyph.dart
+src
+src/generated
+src/generated/ascii_glyph_set.dart
+src/generated/top_level.dart
+src/generated/glyph_set.dart
+src/generated/unicode_glyph_set.dart
+7
+term_glyph.dart
+src
+generated
+ascii_glyph_set.dart
+top_level.dart
+glyph_set.dart
+unicode_glyph_set.dart

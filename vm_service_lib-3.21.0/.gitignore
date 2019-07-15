@@ -1,0 +1,11 @@
+.buildlog
+.DS_Store
+.atom/
+.idea
+.packages
+.pub/
+.dart_tool/
+build/
+packages
+pubspec.lock
+doc/api/

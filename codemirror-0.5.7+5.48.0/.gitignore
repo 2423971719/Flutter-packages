@@ -1,0 +1,26 @@
+# Don’t commit the following directories created by pub.
+.buildlog
+.packages
+.dart_tool/
+.pub/
+build/
+packages
+pubspec.lock
+
+# Or the files created by dart2js.
+*.dart.js
+*.js.deps
+*.js.map
+
+.settings/
+/.DS_Store
+.idea/
+codemirror.dart.iml
+
+# Ignore the codemirror copied resources.
+#lib/addon/
+#lib/codemirror.js
+#lib/css/
+#lib/keymap/
+#lib/mode/
+#lib/theme/

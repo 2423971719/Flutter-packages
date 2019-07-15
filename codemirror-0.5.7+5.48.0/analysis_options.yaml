@@ -1,0 +1,10 @@
+include: package:pedantic/analysis_options.1.7.0.yaml
+
+analyzer:
+  exclude:
+    - 'doc/api/**'
+    - 'lib/mode/**'
+
+linter:
+  rules:
+    - unnecessary_new
