@@ -43,6 +43,7 @@ class _SpinKitFadingCircleState extends State<SpinKitFadingCircle>
 
   @override
   Widget build(BuildContext context) {
+    
     return Center(
       child: SizedBox.fromSize(
         size: Size.square(widget.size),
