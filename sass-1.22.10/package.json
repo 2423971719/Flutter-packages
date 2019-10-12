@@ -1,0 +1,14 @@
+{
+  "//": [
+    "This isn't the official package.json for Dart Sass. It's just used to ",
+    "install dependencies used for testing the Node API. It defines a package",
+    "name to enable GitHub's dependency graph tracking."
+  ],
+  "name": "sass",
+  "devDependencies": {
+    "node-sass": "^4.11.0",
+    "chokidar": "^2.0.0",
+    "fibers": ">=1.0.0 <5.0.0",
+    "intercept-stdout": "^0.1.2"
+  }
+}

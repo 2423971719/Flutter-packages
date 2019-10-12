@@ -1,0 +1,25 @@
+// Copyright (c) 2016, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
+/// Changes the color of the radio button.
+///
+/// Optional parameter $modifier is used for changing the color of certain
+/// material-radio components rather than all material-radio components.
+@mixin material-radio-color(
+    $primary-color, $focus-indicator-color: $primary-color, $modifier: '') {
+  ::ng-deep material-radio#{$modifier}:not(.disabled) .icon-container {
+    &.checked .icon {
+      color: $primary-color;
+    }
+
+    .ripple {
+      color: $focus-indicator-color;
+    }
+
+    &.focus::after {
+      background-color: $focus-indicator-color;
+    }
+  }
+}
+

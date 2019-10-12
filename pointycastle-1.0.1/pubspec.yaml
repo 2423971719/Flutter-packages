@@ -1,0 +1,14 @@
+name: pointycastle
+version: 1.0.1
+author: The Pointy Castle team
+description: A Dart library implementing cryptographic algorithms
+homepage: https://github.com/PointyCastle/pointycastle
+environment:
+  sdk: ">=0.8.10+6 <3.0.0"
+#documentation: http://pointycastle.github.io/docs/
+
+dev_dependencies:
+  benchmark_harness: ">=1.0.5 <2.0.0"
+  matcher: ">=0.12.0 <0.13.0"
+  test: ">=0.12.30 <1.4.0"
+

@@ -1,0 +1,25 @@
+<!--
+ Copyright (c) 2016, the Dart project authors.  Please see the AUTHORS file
+ for details. All rights reserved. Use of this source code is governed by a
+ BSD-style license that can be found in the LICENSE file.
+-->
+<div class="left-icon" *ngIf="hasLeftIcon">
+  <ng-content select="[left-icon]"></ng-content>
+</div>
+<div class="content" [id]="uuid">
+  {{label}}
+  <ng-content></ng-content>
+</div>
+<div *ngIf="removable"
+    class="delete-button"
+    buttonDecorator
+    (trigger)="removeChip"
+    [attr.aria-label]="deleteButtonAriaMessage"
+    [attr.aria-describedby]="uuid">
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+      class="delete-icon">
+        <path d="M12 2c-5.53 0-10 4.47-10 10s4.47 10 10 10 10-4.47 10-10-4.47-10-10-10zm5
+                 13.59l-1.41 1.41-3.59-3.59-3.59 3.59-1.41-1.41 3.59-3.59-3.59-3.59 1.41-1.41 3.59
+                 3.59 3.59-3.59 1.41 1.41-3.59 3.59 3.59 3.59z"/>
+  </svg>
+</div>

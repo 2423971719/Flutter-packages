@@ -1,0 +1,19 @@
+language: dart
+sudo: false
+
+dart:
+  - dev
+
+# TODO: only run dartfmt and dartanalyzer over dev once Dart 2 stable is out
+dart_task:
+  - test
+  - dartanalyzer
+  - dartfmt
+
+# Only building master means that we don't run two builds for each pull request.
+branches:
+  only: [master]
+
+cache:
+  directories:
+    - $HOME/.pub-cache

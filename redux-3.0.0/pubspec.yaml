@@ -1,0 +1,14 @@
+name: redux
+authors:
+- John Ryan <john.p.ryan4@gmail.com>
+- Brian Egan <brian@brianegan.com>
+description: Redux for Dart
+homepage: http://github.com/johnpryan/redux.dart
+version: 3.0.0
+
+environment:
+  sdk: '>=1.24.0 <3.0.0'
+
+dev_dependencies:
+  browser: '>=0.10.0+2 <0.11.0'
+  test: '>=0.12.24+2 <0.13.0'

@@ -1,0 +1,71 @@
+// Copyright (c) 2016, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
+@import 'package:angular_components/material_popup/mixins';
+
+/// Exposes the material-icon color of <material-icon-tooltip>.
+@mixin material-icon-tooltip-theme($primary-color,
+  $active-color: $primary-color) {
+
+  ::ng-deep material-icon-tooltip {
+    material-icon {
+      color: $primary-color;
+    }
+
+    &:hover,
+    &:focus {
+      material-icon {
+        color: $active-color;
+      }
+    }
+  }
+}
+
+/// Because this component uses a <material-popup>, Angular style encapsulation
+/// can prevent styles using this mixin from applying to the contents of the
+/// popup. To address this, use the `tooltipClass` attribute on the
+/// <material-tooltip-card> and then use that class around the reference to the
+/// following mixins:
+///
+/// <material-tooltip-card tooltipClass="foo">
+///
+/// .foo {
+///   @include material-tooltip-card-max-width(...);
+/// }
+
+/// Overrides the default maximum width of <material-tooltip-card>.
+@mixin material-tooltip-card-max-width($max-width: 50 * $mat-grid) {
+  @include material-popup-style {
+    .paper-container {
+      max-width: $max-width;
+    }
+  }
+}
+
+/// Overrides the default maximum height of <material-tooltip-card>.
+@mixin material-tooltip-card-max-height($max-height: 50 * $mat-grid) {
+  @include material-popup-style {
+    .paper-container {
+      max-height: $max-height;
+    }
+  }
+}
+
+/// Overrides the default padding of <material-tooltip-card>.
+@mixin material-tooltip-card-padding($padding: $mat-grid * 3) {
+  @include material-popup-style {
+    .paper-container {
+      padding: $padding;
+    }
+  }
+}
+
+/// Adds a word break property to <material-tooltip-text> or [materialTooltip].
+@mixin ink-tooltip-word-break($word-break: break-word) {
+  @include material-popup-style {
+    .ink-container {
+      word-break: $word-break;
+    }
+  }
+}

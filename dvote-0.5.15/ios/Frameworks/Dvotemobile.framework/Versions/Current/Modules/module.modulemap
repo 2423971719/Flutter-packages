@@ -1,0 +1,8 @@
+framework module "Dvotemobile" {
+	header "ref.h"
+    header "Dvotemobile.objc.h"
+    header "Universe.objc.h"
+    header "Dvotemobile.h"
+
+    export *
+}

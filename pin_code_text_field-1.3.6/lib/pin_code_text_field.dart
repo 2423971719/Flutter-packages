@@ -5,7 +5,8 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart' show CupertinoTextField;
 import 'package:flutter/material.dart';
 import 'package:flutter/animation.dart';
-
+import 'package:flutter/services.dart';
+import 'dart:convert';
 typedef OnDone = void Function(String text);
 typedef PinBoxDecoration = BoxDecoration Function(Color borderColor);
 
@@ -16,7 +17,7 @@ class ProvidedPinBoxDecoration {
     return BoxDecoration(
         border: Border.all(
           color: borderColor,
-          width: 2.0,
+          width: 1.0,
         ),
         borderRadius: BorderRadius.all(const Radius.circular(5.0)));
   };
@@ -24,7 +25,7 @@ class ProvidedPinBoxDecoration {
   /// Underlined BoxDecoration
   static PinBoxDecoration underlinedPinBoxDecoration = (Color borderColor) {
     return BoxDecoration(
-        border: Border(bottom: BorderSide(color: borderColor, width: 2.0)));
+        border: Border(bottom: BorderSide(color: borderColor, width: 1.0)));
   };
 }
 
@@ -87,10 +88,12 @@ class PinCodeTextField extends StatefulWidget {
   final Color hasTextBorderColor;
   final Function(String) onTextChanged;
   final bool autofocus;
+  final FocusNode focusNode;
   final AnimatedSwitcherTransitionBuilder pinTextAnimatedSwitcherTransition;
   final Duration pinTextAnimatedSwitcherDuration;
   final WrapAlignment wrapAlignment;
   final PinCodeTextFieldLayoutType pinCodeTextFieldLayoutType;
+  final TextDirection textDirection;
 
   const PinCodeTextField({
     Key key,
@@ -114,8 +117,10 @@ class PinCodeTextField extends StatefulWidget {
     this.errorBorderColor: Colors.red,
     this.onTextChanged,
     this.autofocus: false,
+    this.focusNode,
     this.wrapAlignment: WrapAlignment.start,
     this.pinCodeTextFieldLayoutType: PinCodeTextFieldLayoutType.NORMAL,
+    this.textDirection: TextDirection.ltr,
   }) : super(key: key);
 
   @override
@@ -125,7 +130,7 @@ class PinCodeTextField extends StatefulWidget {
 }
 
 class PinCodeTextFieldState extends State<PinCodeTextField> {
-  FocusNode focusNode = new FocusNode();
+  FocusNode focusNode;
   String text = "";
   int currentIndex = 0;
   List<String> strList = [];
@@ -136,6 +141,8 @@ class PinCodeTextFieldState extends State<PinCodeTextField> {
   @override
   void didUpdateWidget(PinCodeTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
+    focusNode = widget.focusNode ?? focusNode;
+
     if (oldWidget.maxLength < widget.maxLength) {
       setState(() {
         currentIndex = text.length;
@@ -189,15 +196,20 @@ class PinCodeTextFieldState extends State<PinCodeTextField> {
   @override
   void initState() {
     super.initState();
+    focusNode = widget.focusNode ?? FocusNode();
+
     _initTextController();
     _calculateStrList();
     widget.controller?.addListener(() {
       setState(() {
         _initTextController();
       });
-      widget.onTextChanged(widget.controller.text);
+
+      if (widget.onTextChanged != null) {
+        widget.onTextChanged(widget.controller.text);
+      }
     });
-    focusNode.addListener(() {
+    focusNode?.addListener(() {
       setState(() {
         hasFocus = focusNode.hasFocus;
       });
@@ -235,8 +247,11 @@ class PinCodeTextFieldState extends State<PinCodeTextField> {
 
   @override
   void dispose() {
-    focusNode?.dispose();
-    widget.controller?.dispose();
+    if (widget.focusNode == null) {
+      // Only dispose the focus node if it's internal.  Don't dispose the passed
+      // in focus node as it's owned by the parent not this child widget.
+      focusNode?.dispose();
+    }
     super.dispose();
   }
 
@@ -284,7 +299,8 @@ class PinCodeTextFieldState extends State<PinCodeTextField> {
         autofocus: widget.autofocus,
         focusNode: focusNode,
         controller: widget.controller,
-        keyboardType: TextInputType.number,
+        keyboardType: TextInputType.phone,
+        inputFormatters: [WhitelistingTextInputFormatter.digitsOnly],
         style: TextStyle(
           height: 0.1, color: Colors.transparent,
 //          color: Colors.transparent,
@@ -366,6 +382,7 @@ class PinCodeTextFieldState extends State<PinCodeTextField> {
             direction: Axis.horizontal,
             alignment: widget.wrapAlignment,
             verticalDirection: VerticalDirection.down,
+            textDirection: widget.textDirection,
             children: pinCodes,
           )
         : Row(
@@ -373,6 +390,7 @@ class PinCodeTextFieldState extends State<PinCodeTextField> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             verticalDirection: VerticalDirection.down,
+            textDirection: widget.textDirection,
             children: pinCodes);
   }
 

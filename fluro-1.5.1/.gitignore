@@ -1,0 +1,13 @@
+# mac system
+.DS_Store
+
+# intellij
+.idea
+
+# dart / flutter
+.packages
+pubspec.lock
+coverage
+__temp_coverage*
+.dart_tool/
+build/

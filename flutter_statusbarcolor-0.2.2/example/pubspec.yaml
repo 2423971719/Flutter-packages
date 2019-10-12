@@ -1,0 +1,12 @@
+name: flutter_statusbarcolor_example
+description: Demonstrates how to use the flutter_statusbarcolor plugin.
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  flutter_statusbarcolor:
+    path: ../
+
+flutter:
+  uses-material-design: true

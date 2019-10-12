@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart' show CupertinoTextField;
 import 'package:flutter/material.dart';
 import 'package:flutter/animation.dart';
+import 'package:flutter/services.dart';
 
 typedef OnDone = void Function(String text);
 typedef PinBoxDecoration = BoxDecoration Function(Color borderColor);
@@ -35,8 +36,8 @@ class ProvidedPinBoxTextAnimation {
     return RotationTransition(
         child: DefaultTextStyleTransition(
           style: TextStyleTween(
-                  begin: TextStyle(color: Colors.pink),
-                  end: TextStyle(color: Colors.blue))
+              begin: TextStyle(color: Colors.pink),
+              end: TextStyle(color: Colors.blue))
               .animate(animation),
           child: ScaleTransition(
             child: child,
@@ -175,7 +176,10 @@ class PinCodeTextFieldState extends State<PinCodeTextField> {
   _calculatePinWidth() async {
     if (widget.pinCodeTextFieldLayoutType ==
         PinCodeTextFieldLayoutType.AUTO_ADJUST_WIDTH) {
-      screenWidth = MediaQuery.of(context).size.width;
+      screenWidth = MediaQuery
+          .of(context)
+          .size
+          .width;
       var tempPinWidth = widget.pinBoxWidth;
       var maxLength = widget.maxLength;
       while ((tempPinWidth * maxLength) > screenWidth) {
@@ -298,7 +302,8 @@ class PinCodeTextFieldState extends State<PinCodeTextField> {
         autofocus: widget.autofocus,
         focusNode: focusNode,
         controller: widget.controller,
-        keyboardType: TextInputType.number,
+        keyboardType: TextInputType.phone,
+        inputFormatters: [WhitelistingTextInputFormatter.digitsOnly],
         style: TextStyle(
           height: 0.1, color: Colors.transparent,
 //          color: Colors.transparent,
@@ -359,7 +364,7 @@ class PinCodeTextFieldState extends State<PinCodeTextField> {
         strList[text.length] = "";
       } else {
         strList[text.length - 1] =
-            widget.hideCharacter ? widget.maskCharacter : text[text.length - 1];
+        widget.hideCharacter ? widget.maskCharacter : text[text.length - 1];
       }
       currentIndex = text.length;
     });
@@ -377,19 +382,19 @@ class PinCodeTextFieldState extends State<PinCodeTextField> {
     });
     return widget.pinCodeTextFieldLayoutType == PinCodeTextFieldLayoutType.WRAP
         ? Wrap(
-            direction: Axis.horizontal,
-            alignment: widget.wrapAlignment,
-            verticalDirection: VerticalDirection.down,
-            textDirection: widget.textDirection,
-            children: pinCodes,
-          )
+      direction: Axis.horizontal,
+      alignment: widget.wrapAlignment,
+      verticalDirection: VerticalDirection.down,
+      textDirection: widget.textDirection,
+      children: pinCodes,
+    )
         : Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            verticalDirection: VerticalDirection.down,
-            textDirection: widget.textDirection,
-            children: pinCodes);
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        verticalDirection: VerticalDirection.down,
+        textDirection: widget.textDirection,
+        children: pinCodes);
   }
 
   Widget _buildPinCode(int i, BuildContext context) {
@@ -432,7 +437,7 @@ class PinCodeTextFieldState extends State<PinCodeTextField> {
       return AnimatedSwitcher(
         duration: widget.pinTextAnimatedSwitcherDuration,
         transitionBuilder: widget.pinTextAnimatedSwitcherTransition ??
-            (Widget child, Animation<double> animation) {
+                (Widget child, Animation<double> animation) {
               return child;
             },
         child: Text(

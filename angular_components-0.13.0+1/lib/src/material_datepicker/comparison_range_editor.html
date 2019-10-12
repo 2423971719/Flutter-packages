@@ -1,0 +1,19 @@
+<!--
+ Copyright (c) 2016, the Dart project authors.  Please see the AUTHORS file
+ for details. All rights reserved. Use of this source code is governed by a
+ BSD-style license that can be found in the LICENSE file.
+-->
+<div class="comparison-toggle-section">
+  <material-toggle class="comparison-toggle"
+                   [label]="comparisonHeaderMsg"
+                   [disabled]="!model.comparisonSupported"
+                   [(checked)]="comparisonEnabled">
+  </material-toggle>
+</div>
+
+<div *ngIf="model.comparisonEnabled">
+    <material-select-item *ngFor="let option of model.validComparisonOptions"
+                          closeOnActivate="false"
+                          (trigger)="model.comparisonOption = option"
+                          [selected]="model.comparisonOption == option">{{comparisonOptionMsg(option)}}</material-select-item>
+</div>

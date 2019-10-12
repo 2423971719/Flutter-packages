@@ -1,0 +1,34 @@
+// Copyright (c) 2016, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
+/// Changes the color of the checkbox.
+///
+/// Optional parameter $modifier is used for changing the color of certain
+/// material-checkbox components rather than all material-checkbox components.
+@mixin material-checkbox-color($color, $modifier: '') {
+  ::ng-deep material-checkbox#{$modifier}:not(.disabled)
+      .icon-container .icon.filled {
+    color: $color;
+  }
+}
+
+/// Removes left margin of <material-checkbox>.
+///
+/// Example use: @include checkbox-no-left-margin
+@mixin checkbox-no-left-margin {
+  margin-left: -3px;
+}
+
+/// Removes right margin of <material-checkbox>.
+@mixin checkbox-no-right-margin {
+  margin-right: 0;
+}
+
+/// Hides the text portion of <material-checkbox>.
+@mixin checkbox-hide-label {
+  ::ng-deep .content {
+    display: none;
+  }
+}
+

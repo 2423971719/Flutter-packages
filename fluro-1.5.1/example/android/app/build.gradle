@@ -1,0 +1,42 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply from: "../config.gradle"
+apply from: "../flutter.gradle"
+
+android {
+	compileSdkVersion versions.targetSDK
+	buildToolsVersion "${versions.buildTools}"
+
+	defaultConfig {
+		minSdkVersion versions.minSDK
+		targetSdkVersion versions.targetSDK
+		applicationId "$appInfo.applicationID"
+		versionCode appInfo.build
+		versionName "${appInfo.version}"
+		testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+	}
+	lintOptions {
+		disable 'InvalidPackage'
+	}
+	buildTypes {
+		release {
+			// TODO: Add your own signing config for the release build.
+			// Signing with the debug keys for now, so `flutter run --release` works.
+			signingConfig signingConfigs.debug
+		}
+	}
+}
+
+dependencies {
+	implementation fileTree(dir: 'libs', include: ['*.jar'])
+	// kotlin
+	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${versions.kotlin}"
+	// google
+	implementation "com.android.support:appcompat-v7:${versions.googleSupport}"
+	implementation "com.android.support:support-v13:${versions.googleSupport}"
+	implementation "com.android.support:support-v4:${versions.googleSupport}"
+	// testing
+	androidTestImplementation "com.android.support:support-annotations:${versions.googleSupport}"
+	androidTestImplementation 'com.android.support.test:runner:1.0.1'
+	androidTestImplementation 'com.android.support.test:rules:1.0.1'
+}

@@ -1,0 +1,229 @@
+## Testing
+
+language: shell
+
+env:
+  global:
+  - DART_CHANNEL=stable
+  - DART_VERSION=latest
+
+# Only building master means that we don't run two builds for each pull request.
+branches:
+  only:
+    - master
+    # Feature branches beginning with "feature."
+    - "/^feature\\..*/"
+    # Semantic version tags and legacy branches of the form "1.2.x".
+    - "/^\\d+\\.\\d+\\.(\\d+([+-].*)?|x)$/"
+
+cache:
+  directories:
+  - $HOME/.pub-cache
+
+# Install the Dart SDK.
+before_install:
+- tool/travis/use_dart.sh
+- export PATH="$PATH:`pwd`/dart-sdk/bin";
+- dart --version
+
+jobs:
+  include:
+  ## Testing
+
+  # Language specs, defined in sass/sass-spec. These need Ruby to run the spec
+  # runner.
+  - &specs
+    name: sass-spec | Dart stable | synchronous
+    language: ruby
+    install:
+    - export sass_spec_ref=`tool/travis/sass-spec-ref.sh`
+    - git init sass-spec
+    - git -C sass-spec fetch git://github.com/sass/sass-spec "$sass_spec_ref" --depth 1
+    - git -C sass-spec checkout FETCH_HEAD
+    - bundle install --gemfile=sass-spec/Gemfile --jobs=3 --retry=3
+    script: tool/travis/task/specs.sh
+  - <<: *specs
+    name: sass-spec | Dart dev | synchronous
+    env: DART_CHANNEL=dev
+  - <<: *specs
+    name: sass-spec | Dart stable | asynchronous
+    env: ASYNC=true
+
+  # Pure Dart unit tests, defined in test/.
+  - &dart-tests
+    name: Dart tests | Dart stable
+    install: pub run grinder app-snapshot
+    script: tool/travis/task/dart_tests.sh
+  - <<: *dart-tests
+    name: Dart tests | Dart dev
+    env: DART_CHANNEL=dev
+  - <<: *dart-tests
+    os: windows
+  - <<: *dart-tests
+    os: osx
+
+  # Unit tests that use Node.js, defined in test/.
+  #
+  # The versions should be kept up-to-date with the latest LTS Node releases.
+  # They next need to be rotated December 2019. See
+  # https://github.com/nodejs/Release.
+  #
+  # TODO(nweiz): Run Node tests on Windows when [this issue][] is fixed.
+  #
+  # [this issue]: https://travis-ci.community/t/windows-instances-hanging-before-install/250/28.
+  - &node-tests
+    name: Node tests | Dart stable | Node stable
+    language: node_js
+    node_js: stable
+    install: pub run grinder before-test
+    script: tool/travis/task/node_tests.sh
+  - <<: *node-tests
+    name: Node tests | Dart stable | Node Carbon
+    node_js: lts/carbon
+  - <<: *node-tests
+    name: Node tests | Dart stable | Node Dubnium
+    node_js: lts/dubnium
+  - <<: *node-tests
+    os: osx
+  - <<: *node-tests
+    name: Node tests | Dart dev | Node stable
+    env: DART_CHANNEL=dev
+
+  # Miscellaneous checks.
+  - name: static analysis
+    language: dart
+    dart_task: {dartanalyzer: --fatal-warnings --fatal-infos lib tool test}
+  - name: code formatting
+    language: dart
+    dart_task: dartfmt
+
+  ## Deployment
+
+  # Sanity check before releasing anywhere.
+  - stage: sanity check
+    if: &deploy-if
+      (type IN (push, api)) AND (repo = sass/dart-sass) AND tag =~ ^\d+\.\d+\.\d+([+-].*)?$
+    script: pub run grinder sanity-check-before-release
+
+  # Deploy Linux and Windows releases to GitHub. Mac OS releases are deployed in
+  # a later stage so that we can build application snapshots on Mac OS bots.
+  - stage: deploy 1
+    name: "GitHub: Windows and Linux"
+    if: *deploy-if
+    env: &github-env
+      - GITHUB_USER=sassbot
+      # GITHUB_AUTH="..."
+      #
+      # Note that this overrides the read-only auth token that's set for all
+      # builds.
+      - secure: "AAP74aT+8SQmwGeHrCsZ7GgppvCCkDAZXszivocMy3Fi9gfMCLABBCh67pGINJX4VlLW7ftPF3xivlvgGu+e4ncXz9m9jIPZ9Iza3cW5jCnCgyRGZD98gwabIDFWiv4X9V2xnJA2p1ZuYBf8Sh3TTipUFBKMjlnxVxYkIOTud4rUss/htFhxVA/oFTo0ThTZwXuxJ+GRGTM4PcuHPJvPf18iRPs2AHFV6ZP51xgc3AsXC6Zyom5EJeX0yGj9zWQ0XCjnuFdGsI6G9jmkrmqgAXuUipgqAn0tjxPYp9R/1HqnBLD3Zbrvyi5pCiSFclU6CS6kTDbefzPOc5+zrnlkaolVeF8tQ+EhZiZqtLnpLYUz9bgknoFUapUN4N0R36sKBStdRv54+sMeoOzpQ8ep3PeZW5nWbak12wcrDx38ToWs6hQ4ycb0SQDZZatHsASpSu2nX8HwzZSDAZmsAdB+epPmgA0CBjWVG1ycmVnT6l3OopUmbaY3pXBNzFUXq5Fcd7Q39/MfrmHpyxSc3QVf8xNtUx9ggYtK0Kwx6dgykhNMVzFGZRVyQgwpaiyDqgMGEU2GQzzcJhgKo9+y1fDtdfj/cctmvJ2Fo1fkk+DMkEPUHGOVo6uKFnartky9iLm1WiHDMruJ6SIOJzAnb+TMBWQTSwI+F4wyEiRVR8Zv4uA="
+    script: skip # Don't run tests
+    deploy:
+      provider: script
+      script: pub run grinder github-release github-linux github-windows
+      skip_cleanup: true # Don't clean up the Dart SDK.
+
+      # This causes the deploy to only be build when a tag is pushed. This
+      # is because the `tag` attribute in `if:` statements has a different
+      # understanding of the "current tag" than this, which uses the
+      # `TRAVIS_TAG` environment variable. `if:` statements check whether a
+      # tag exists that refers to the current commit, whereas `TRAVIS_TAG`
+      # checks whether the current build was caused by a tag.
+      #
+      # We check `if:` because it avoids unnecessary build steps, and
+      # `on: {tags: true}` ensures that we only deploy on the build caused
+      # by pushing a tag, not the build caused by pushing master.
+      on: {tags: true}
+
+  # Deploy to npm.
+  - name: npm
+    if: *deploy-if
+    env:
+      # NPM_RC="..."
+      - secure: "Iv6UKB6mH0GLkRQtaLeZnoW0QMmXbzGVX/QO+vvT26yWvqlW/ik+YeHB+4VLZFz/4xezukkztVENdxNDCnrQA/NX7fVhjqj4Px2JQau0V0ljYN64H+o0oxlBeMQqnsVOJcsU7DuPFPErYixkE3yuN6DqIYE+DYe3fVQg/1RBCs2z1nejg4udbZG7D0yfrxZSCckhsyBH1Ej72FhMGMaFq7k7IMC7f/sGYZZYsOe2WKmsYF35hyL/twIXKBNxjPat1HmsVT/3VOUIF+doO26BxthEc68Tmp3SHucEXHWPEjk9N87DxLClGkHvvZ2PUK9nYB9/KqxvJqf/AcDO34vS0lAU809Eov7dK/19WE1GtgA/gL0B/nh2QYbWpbO/HPzxFqOYwfzLtAXvwUr45eMNxmh1yupbAtxRvst7ZO/UTC+awW55AXnVd4jiTzZ/jqV52aGbClN+escPZCYXgYosvJLK3G4xLYCY4TTC99riBQZ0MDLfCt35+RivjNLVf8vecGT8WTmVQySzq0Cthy/9SCp1OzWT5roY2rzkwvR4R0+42f48qyDU/buUgPBsw9zwCabWVoB0p4hflalEhc9EwbRn5oDI0NHwXE0r83movx+JHHPBau1zwX53DJSpSFXnDPi6KaNpg52wyuIIzO90zA7FZTRR9My38AzYgVaKkdE="
+    script: skip
+    language: node_js
+    node_js: stable
+    deploy:
+      provider: script
+      script: tool/travis/deploy/npm.sh
+      skip_cleanup: true
+      on: {tags: true}
+
+  # Deploy to pub.
+  - name: pub
+    if: *deploy-if
+    env:
+      # PUB_CREDENTIALS="..."
+      - secure: "L7p8nH1qhGbOdqXZSPJzaC4wv1Rf4gJUiPpy2e0pgkk78jFyaLJ4Vt6c/976hQxETZQ8q1mChj7xrgEI4d6rN+iBEDSdgCiV+toVVYCzX9gnzb8+a5qTBbRNLrcC4jPr5+6LPK+qklrAyYi56JCYI2CgCOxUzo/CHOk/nHbEWwxMoD5Ifzat3NXwyb/9RKHH/4YYBi2PRkBrIuGTvZi4VqyIJ7AJu8eCZYPD8e1ij5muLhTxgQvycIf6fkSBbhMoC/ULExkV3zFEgY1eU/UMdXPR68/qgne+q0ph4K5ArTgFoPAVVIDYv4CZfpx2NVEpluWz2OQ/Lr+VxTqAYMGDCEEreeTTTE26JFCquUwSypNBSo7jtAoMtFDrX3fwa0jt9lhkwTMlEQtLg3ykpABsn7E4nEYw6K3hAqjV5kJFdgNFqli83QpXXu9mfUtif7Wzlekiw6DuN7FKTr8VohaqlVgp5gSExp/zuFCOFQn3+LnzxZtFJbkiQw0Bbii4TBwrASrhvNcPE/CrCbq0OLrNYrJH8UiLsZGoz1iAuPyCvbpiD7eXrL4vodR73IGUBx2hKTbolP8EWseR/nw4InH50kc+jhDMaT+Lj34q+9Icv2Q4ICWsPky7NhLDJWvLntiExwkos4fPtmr5SuaV/dCVox1Qvkzg7NBoqihrdQC8Tak="
+    script: skip
+    deploy:
+      provider: script
+      script: tool/travis/deploy/pub.sh
+      skip_cleanup: true
+      on: {tags: true}
+
+  # Deploy to Homebrew.
+  - name: Homebrew
+    if: *deploy-if
+    env: *github-env
+    script: skip
+    deploy:
+      provider: script
+      script: pub run grinder update-homebrew
+      skip_cleanup: true
+      on: {tags: true}
+
+  # Deploy to Chocolatey.
+  - name: Chocolatey
+    if: *deploy-if
+    env:
+      # CHOCO_TOKEN="..."
+      - secure: "cW11kQYBBEElfVsc1pJfVEHOMYwt0ZK+9STZHwSPbAISlplIRnsimMN7TqCY2aLnkWXyUMU7DphIl9uQ86M4BT1bJopsHbapj27bFSlKWHlBSDB/xylFHywV41Yk5lMlr8DLMbsSzVahasyR34xS6HYIRlDpZ9TFiQuDQNJxQmqTZJg/FC+3nqCI7tyMKGkWc48ikTcmqDMHsG9CudG2u+Q3S9sLNXArh9T4tSnAyWkTvSrS05mvFx5tC83PcG9/VkioTId+VRSJchwTmCxDFDROrTikTXZMtYn8wMAQ2wQ34TQXNZMZ9uiHA6W0IuJV2EnYerJbqV2lrJq9xqZywKu6HW6i4GhrCvizALNFZx/N7s/10xuf3UcuWizYml/e0MYT+6t4ojTYBMKv+Cx+H2Y2Jdpvdn2ZAIl6LaU3pLw4OIPJ7aXjDwZd63MPxtwGwVLHbH7Zu+oUv1erIq5LtatuocGWipD8WdiMBQvyCuDRMowpLPoAbj+mevOf+xlY2Eym4tOXpxM7iY3lXFHROo5dQbhsARfVF9J1gl5PuYXvCjxqTfK/ef9t3ZoDbi57+yAJUWlZfWa5r1zKE8OS0pA8GfQRLom/Lt0wKVw4Xiofgolzd9pEHi4JpsYIQb8O+u1ACQU6nBCS87CGrQ+ylnzKfGUs0aW2K3gvbkg0LUg="
+    script: skip
+    deploy:
+      provider: script
+      script: pub run grinder update-chocolatey
+      skip_cleanup: true
+      on: {tags: true}
+
+  # Redeploy sass-lang.com.
+  - name: sass-lang.com
+    if: *deploy-if
+    env:
+      # HEROKU_TOKEN="..."
+      - secure: "JUBfLfJr+5RIvxkk+1qqtyJxaHq2A9x78G9L9bUTjBD3C7XJOmJtt8u+pAgperL+fIfrlcAVzmYTyRGLj+0PL4VcxMTrmn604FIn+ffcgatylYKtPdpJq5dnXQ4U0+ROaZnq1mPZeUI7OHwRlVcQStIWkPxk7Eno+ZqxFyziLZ4wxo7l809iCAbhJttCfWPupyHX75cHhBMFaPEk9LYUrxQURyE0GKMQgDKHY/ehe87gyuKt3o79gi7/E0chQApv1jeua4xz5tyNBNQH/nwuJmmBCab/IdgTLn2vj4qjT1ENeB5PINCfFOT98IPVREOLbY+jiGRVwQFJbC55mOBQH21mfIt/XLhcjYHe80X4PyYhtJJ2GDadcyrzppZmHpEDHzfR8B29LEKhNM1VfUTZ8I9+TudXW8uMjtqCsXyi8bKZLsuZNNSlWVh1qIR+FXMDTrYNOnTcvgzv5yi6fbD10Uf8k1G0pHtKQiFainWatmJhNIMtGoYe7LRAB0Rj7OGWDMv/PHy/+Z7BKIj3b0LefVN1xpeuy3mMhMq9g5Q8HI8yk37DNmZQ9kwgHpIUk/t2xAdwzZ0XMSDFW9iHV48/iHwi0t5M2RCFRnI8ZaUNU5Z8QLUPHnazCucIvR4N8ns1yFwDgNQ5CzlBFrV70EwgqZhjjToAOhnIXpHMWr3AVAw="
+    install: skip
+    script: skip
+    deploy:
+      provider: script
+      # Heroku doesn't have a public API endpoint for this yet, so we use the
+      # private endpoint instead.
+      script: tool/travis/deploy/heroku.sh
+      on: {tags: true}
+
+  # Deploy to Bazel. This is in a separate deploy stage because it needs to
+  # install the npm package.
+  - stage: deploy 2
+    name: Bazel
+    if: *deploy-if
+    env: *github-env
+    script: skip
+    language: node_js
+    node_js: stable
+    deploy:
+      provider: script
+      script: pub run grinder update-bazel
+      skip_cleanup: true
+      on: {tags: true}
+
+  - name: "GitHub: Mac OS"
+    if: *deploy-if
+    env: *github-env
+    script: skip
+    os: osx
+    deploy:
+      provider: script
+      script: pub run grinder github-mac-os
+      skip_cleanup: true
+      on: {tags: true}

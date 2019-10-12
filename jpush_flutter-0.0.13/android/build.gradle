@@ -1,0 +1,42 @@
+group 'com.jiguang.jpush'
+version '1.0-SNAPSHOT'
+
+buildscript {
+    repositories {
+        google()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.1.2'
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
+
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 27
+
+    defaultConfig {
+        minSdkVersion 16
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    lintOptions {
+        disable 'InvalidPackage'
+    }
+}
+
+dependencies {
+    implementation 'cn.jiguang.sdk:jpush:3.3.4'
+    implementation 'cn.jiguang.sdk:jcore:2.1.2'
+    implementation 'com.android.support:appcompat-v7:27.+'
+    compileOnly files('libs/flutter.jar')
+
+}

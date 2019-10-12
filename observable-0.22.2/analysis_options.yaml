@@ -1,0 +1,21 @@
+include: package:pedantic/analysis_options.yaml
+linter:
+  rules:
+    # Errors
+    - control_flow_in_finally
+    - empty_statements
+    - test_types_in_equals
+    - throw_in_finally
+
+    # Style
+    - annotate_overrides
+    - await_only_futures
+    - camel_case_types
+    - comment_references
+    - empty_catches
+    - empty_constructor_bodies
+    - hash_and_equals
+    - library_prefixes
+    - non_constant_identifier_names
+    - slash_for_doc_comments
+    - type_init_formals

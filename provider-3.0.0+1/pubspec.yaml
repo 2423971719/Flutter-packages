@@ -1,0 +1,20 @@
+name: provider
+description: A dependency injection system built with widgets for widgets. provider is mostly syntax sugar for InheritedWidget, to make common use-cases straightforward.
+version: 3.0.0+1
+homepage: https://github.com/rrousselGit/provider
+authors:
+  - Remi Rousselet <darky12s@gmail.com>
+  - Flutter Team <flutter-dev@googlegroups.com>
+
+environment:
+  sdk: ">=2.0.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  pedantic: ^1.4.0
+  mockito: ^4.0.0
+  flutter_test:
+    sdk: flutter

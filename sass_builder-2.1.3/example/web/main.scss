@@ -1,0 +1,10 @@
+@import "sub";
+@import "package:bootstrap_sass/scss/bootstrap";
+
+.a {
+  color: blue;
+}
+
+.c {
+  color: $body-color;
+}

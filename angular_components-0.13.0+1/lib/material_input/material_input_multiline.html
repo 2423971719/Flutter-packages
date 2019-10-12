@@ -1,0 +1,100 @@
+<!--
+ Copyright (c) 2016, the Dart project authors.  Please see the AUTHORS file
+ for details. All rights reserved. Use of this source code is governed by a
+ BSD-style license that can be found in the LICENSE file.
+-->
+<div class="baseline" #popupSourceEl>
+  <div class="top-section">
+    <div class="input-container"
+         [class.floated-label]="floatingLabel">
+      <div class="label" aria-hidden="true">
+        <!-- needed for floating label animation measurement -->
+        <span class="label-text"
+              [class.multiline]="rows > 1"
+              [class.invisible]="!labelVisible"
+              [class.animated]="labelAnimated"
+              [class.reset]="labelAnimationReset"
+              [class.focused]="focused && floatingLabelVisible"
+              [class.invalid]="invalid && floatingLabelVisible">
+          {{label}}
+        </span>
+      </div>
+      <!-- This div needs its height set to a fixed value when the height of
+            the textarea is static because static positioned elements have
+            less trailing white space than absolute positioned elements -->
+      <div
+        [style.height.px]="textAreaHeight">
+        <!-- Invisible text for sizing the multiline input to grow
+              with typing. Hidden when the height of the textarea is static in
+              order to prevent negative layout performance impact.-->
+        <div class="mirror-text" *ngIf="rows != maxRows"
+            aria-hidden="true"
+            [style.min-height.px]="minInputHeight"
+            [style.max-height.px]="maxInputHeight">
+          {{mirrorText}}
+        </div>
+
+        <!-- Invisible element for measuring line height of the input. -->
+        <div class="line-height-measure"
+            aria-hidden="true"
+            #lineHeightMeasure>
+          <br/>
+        </div>
+
+        <textarea #textareaEl
+                  focusableElement
+                  class="textarea"
+                  [class.disabledInput]="disabled"
+                  [class.staticHeight]="rows == maxRows"
+                  [style.height.px]="textAreaHeight"
+                  [attr.aria-describedby]="inputAriaDescribedBy"
+                  attr.aria-invalid="{{invalid}}"
+                  [attr.aria-label]="ariaLabel"
+                  [readonly]="disabled"
+                  [ngModel]="inputText"
+                  (blur)="inputBlurAction($event, textareaEl.validity.valid, textareaEl.validationMessage)"
+                  (change)="inputChange(textareaEl.value, textareaEl.validity.valid, textareaEl.validationMessage);$event.stopPropagation()"
+                  (focus)="inputFocusAction"
+                  (input)="inputKeypress(textareaEl.value, textareaEl.validity.valid, textareaEl.validationMessage)"
+                  [tabindex]="inputTabIndex"></textarea>
+      </div>
+    </div>
+    <ng-content select="[trailing]"></ng-content>
+  </div>
+
+  <div class="underline">
+    <div class="disabled-underline" [class.invisible]="!disabled">
+    </div>
+    <div class="unfocused-underline"
+         [class.invisible]="disabled" [class.invalid]="invalid"></div>
+    <div class="focused-underline"
+         [class.invisible]="!focused || disabled" [class.invalid]="invalid"
+         [class.animated]="underlineAnimated"></div>
+  </div>
+</div>
+
+<div class="bottom-section" *ngIf="displayBottomPanel" [ngSwitch]="bottomPanelState">
+  <div class="error-text"
+       role="alert"
+       attr.aria-hidden="{{!invalid}}"
+       [class.focused]="focused"
+       [class.invalid]="invalid"
+       *ngSwitchWhen="errorState">
+    {{errorMessage}}
+  </div>
+  <div class="hint-text" *ngSwitchWhen="hintState">
+    {{hintText}}
+  </div>
+  <div class="spaceholder"
+       *ngSwitchWhen="emptyState"
+       tabindex="-1"
+       (focus)="$event.stopPropagation()">
+    &nbsp;
+  </div>
+  <div *ngIf="maxCount != null || showCharacterCount"
+       class="counter"
+       aria-hidden="true"
+       [class.invalid]="invalid">
+    {{msgCharacterCounter(inputTextLength, maxCount)}}
+  </div>
+</div>

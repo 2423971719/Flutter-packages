@@ -1,0 +1,15 @@
+dart:
+  - dev
+
+stages:
+  - analyze_and_format:
+    - group:
+      - dartfmt: sdk
+      - dartanalyzer: --fatal-infos --fatal-warnings .
+    - dartanalyzer: --fatal-warnings .
+      dart:
+        - 2.4.0
+  - unit_test:
+    - group:
+      - test: -x presubmit-only
+      - test: -t presubmit-only --run-skipped
