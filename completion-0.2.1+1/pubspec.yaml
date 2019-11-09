@@ -1,0 +1,20 @@
+name: completion
+version: 0.2.1+1
+author: Kevin Moore <github@j832.com>
+description: A packaged to add shell command completion to your Dart application
+homepage: https://github.com/kevmoo/completion.dart
+
+environment:
+  sdk: '>=2.0.0-dev.54.0 <3.0.0'
+
+dependencies:
+  args: ^1.4.0
+  logging: ^0.11.0
+  path: ^1.0.0
+
+dev_dependencies:
+  test: ^1.2.0
+  test_process: ^1.0.1
+
+executables:
+  shell_completion_generator: null

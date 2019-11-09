@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Dart command line",
+      "type": "dart",
+      "request": "launch",
+      "cwd": "${workspaceRoot}",
+      "program": "${workspaceRoot}/tool/generate.dart",
+      "args": [],
+      "debugSettings": "${command.debugSettings}"
+    }
+  ]
+}
